@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mysql:
+    image: mysql
+    restart: always
+    container_name: local-mysql-db-container
+    environment:
+      - MYSQL_DATABASE=h-9
+      - MYSQL_ROOT_PASSWORD=passwd
+      - TZ=Asia/Seoul
+    volumes:
+      - ./mysql/db:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
