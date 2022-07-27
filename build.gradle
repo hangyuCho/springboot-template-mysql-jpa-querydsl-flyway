@@ -1,3 +1,11 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+	dependencies {
+		classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
+	}
+}
 plugins {
 	id 'org.springframework.boot' version '2.7.1'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -6,8 +14,11 @@ plugins {
 }
 
 group = 'com.h9page'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '17'
+
+
+apply plugin: "com.ewerk.gradle.plugins.querydsl"
 
 configurations {
 	compileOnly {
@@ -32,7 +43,45 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
+	// querydsl
+	//implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+//	annotationProcessor(
+//			"javax.persistence:javax.persistence-api",
+//			"javax.annotation:javax.annotation-api",
+//			"com.querydsl:querydsl-apt:${queryDslVersion}:jpa"
+//	)
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+	library = "com.querydsl:querydsl-apt"
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	//main {
+//		java {
+//			srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+//		}
+	//}
+	//main.java.srcDir querydslDir
+	main {
+		java {
+			srcDirs = ['src/main/java', querydslDir]
+		}
+	}
+}
+
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
+}
+
+configurations {
+	querydsl.extendsFrom compileClasspath
 }
 
 tasks.named('test') {
